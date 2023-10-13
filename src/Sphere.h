@@ -85,6 +85,43 @@ public:
     RaySphereIntersection intersect(const Ray &ray) const {
         RaySphereIntersection intersection;
         //TODO calcul l'intersection rayon sphere
+
+        //std::cout << "intersection lancé" << std::endl;
+        float r = this->m_radius;
+        Vec3 c = this->m_center;
+        Vec3 d = ray.direction();
+        Vec3 o =ray.origin();
+        Vec3 racines[2];
+        for (int i = 0; i < 3; i++)
+        {
+            float loop_c =c.mVals[i];
+            float loop_d =d.mVals[i];
+            float loop_o =o.mVals[i];
+            float a=(loop_d*loop_d);
+            float b=loop_d*(loop_o-loop_c);
+            float c=(pow(abs(loop_o-loop_c),2)-r*r);
+            float discriminant =pow(b,2)-4*a*c;
+            //std::cout << discriminant << std::endl;
+            if (discriminant<0)
+            {
+                intersection.intersectionExists = false;
+                std::cout << "ECHEC" << i<< std::endl;
+                return intersection;
+            }
+            if (discriminant==0)
+            {
+                racines[0][i] =racines[1][i]= -b/(2*a);
+            }
+            if (discriminant>0)
+            {
+                racines[0][i]= -b+sqrt(discriminant)/(2*a);
+                racines[1][i]= -b-sqrt(discriminant)/(2*a);
+            }
+        }
+        intersection.intersection=racines[0];
+        intersection.secondintersection=racines[1];
+        intersection.intersectionExists=true;
+        std::cout << "intersection trouvé" << std::endl;
         return intersection;
     }
 };
