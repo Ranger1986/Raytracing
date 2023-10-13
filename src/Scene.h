@@ -97,7 +97,7 @@ public:
 
     Vec3 rayTrace( Ray const & rayStart ) {
         //TODO appeler la fonction recursive
-        Vec3 color;
+        Vec3 color(1.0,0.0,0.0);
         return color;
     }
 
