@@ -206,6 +206,13 @@ void ray_trace_from_camera() {
 void key (unsigned char keyPressed, int x, int y) {
     Vec3 pos , dir;
     switch (keyPressed) {
+    case 'a':
+        camera.apply();
+        rays.clear();
+        ray_trace_from_camera();
+        clear ();
+        exit (0);
+        break;
     case 'f':
         if (fullScreen == true) {
             glutReshapeWindow (SCREENWIDTH, SCREENHEIGHT);
@@ -320,10 +327,11 @@ int main (int argc, char ** argv) {
 
     camera.move(0., 0., -3.1);
     selected_scene=0;
-    scenes.resize(3);
+    scenes.resize(4);
     scenes[0].setup_single_sphere();
-    scenes[1].setup_single_square();
-    scenes[2].setup_cornell_box();
+    scenes[1].setup_double_sphere();
+    scenes[2].setup_single_square();
+    scenes[3].setup_cornell_box();
 
     glutMainLoop ();
     return EXIT_SUCCESS;

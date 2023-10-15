@@ -85,6 +85,39 @@ public:
     RaySphereIntersection intersect(const Ray &ray) const {
         RaySphereIntersection intersection;
         //TODO calcul l'intersection rayon sphere
+        float rayon = this->m_radius;
+        Vec3 centre = this->m_center;
+        Vec3 direction = ray.direction();
+        Vec3 origin =ray.origin();
+        float a = Vec3::dot(direction, direction);
+        float b = 2.0f * Vec3::dot(direction,origin-centre);
+        float c = Vec3::dot(origin-centre, origin-centre)-pow(rayon,2);
+        float discriminant =pow(b,2)-4*a*c;
+        if (discriminant<0)
+        {
+            intersection.intersectionExists = false;
+        }
+        if (discriminant==0)
+        {
+            intersection.intersectionExists=true;
+            intersection.intersection=direction*(-b/(2*a));
+        }
+        if (discriminant>0)
+        {
+            intersection.intersectionExists=true;
+            Vec3 intersection1=direction*(-b+sqrt(discriminant)/(2*a));
+            Vec3 intersection2=direction*(-b-sqrt(discriminant)/(2*a));
+            if (calculDistance(ray.origin(), intersection1)<calculDistance(ray.origin(), intersection2))
+            {
+                intersection.intersection=intersection1;
+                intersection.secondintersection=intersection2;
+            }
+            else
+            {
+                intersection.intersection=intersection2;
+                intersection.secondintersection=intersection1;
+            }
+        }
         return intersection;
     }
 };
