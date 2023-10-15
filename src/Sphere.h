@@ -105,8 +105,18 @@ public:
         if (discriminant>0)
         {
             intersection.intersectionExists=true;
-            intersection.intersection= direction*(-b+sqrt(discriminant)/(2*a));
-            intersection.secondintersection= direction*(-b-sqrt(discriminant)/(2*a));
+            Vec3 intersection1=direction*(-b+sqrt(discriminant)/(2*a));
+            Vec3 intersection2=direction*(-b-sqrt(discriminant)/(2*a));
+            if (calculDistance(ray.origin(), intersection1)<calculDistance(ray.origin(), intersection2))
+            {
+                intersection.intersection=intersection1;
+                intersection.secondintersection=intersection2;
+            }
+            else
+            {
+                intersection.intersection=intersection2;
+                intersection.secondintersection=intersection1;
+            }
         }
         return intersection;
     }

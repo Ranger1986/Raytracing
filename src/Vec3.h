@@ -86,6 +86,9 @@ public:
     }
 };
 
+static inline float calculDistance(Vec3 pt1,Vec3 pt2){
+    return sqrt(pow(pt1[0]-pt2[0],2)+pow(pt1[1]-pt2[1],2)+pow(pt1[2]-pt2[2],2));
+}
 static inline Vec3 operator + (Vec3 const & a , Vec3 const & b) {
    return Vec3(a[0]+b[0] , a[1]+b[1] , a[2]+b[2]);
 }
