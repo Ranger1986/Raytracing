@@ -92,11 +92,11 @@ public:
     Vec3 rayTraceRecursive( Ray ray , int NRemainingBounces ) {
         //TODO 
         
-        Vec3 color=Vec3(0.0,0.0,0.0);
+        Vec3 color;
         RaySceneIntersection raySceneIntersection = computeIntersection(ray);
         if (raySceneIntersection.intersectionExists)
         {
-            color=Vec3(1.0,0.0,0.0);
+            color=spheres[0].material.diffuse_material;//Vec3(1.0,0.0,0.0);
         }
         return color;
     }
@@ -128,11 +128,11 @@ public:
         {
             spheres.resize( spheres.size() + 1 );
             Sphere & s = spheres[spheres.size() - 1];
-            s.m_center = Vec3(0. , 0. , 0.);
-            s.m_radius = 1.f;
+            s.m_center = Vec3(1.0 , 0. , 0.);
+            s.m_radius = 0.5;
             s.build_arrays();
             s.material.type = Material_Mirror;
-            s.material.diffuse_material = Vec3( 1.,1.,1 );
+            s.material.diffuse_material = Vec3( 1.,0.0,0.0 );
             s.material.specular_material = Vec3( 0.2,0.2,0.2 );
             s.material.shininess = 20;
         }

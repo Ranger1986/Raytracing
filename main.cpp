@@ -206,6 +206,13 @@ void ray_trace_from_camera() {
 void key (unsigned char keyPressed, int x, int y) {
     Vec3 pos , dir;
     switch (keyPressed) {
+    case 'a':
+        camera.apply();
+        rays.clear();
+        ray_trace_from_camera();
+        clear ();
+        exit (0);
+        break;
     case 'f':
         if (fullScreen == true) {
             glutReshapeWindow (SCREENWIDTH, SCREENHEIGHT);
