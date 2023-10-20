@@ -108,6 +108,28 @@ public:
                 }
             }
         }
+        for (int i = 0; i < squares.size(); i++)
+        {
+            RaySquareIntersection intersection = squares[i].intersect(ray);
+            if (intersection.intersectionExists)
+            {
+                distanceObjet = calculDistance(intersection.intersection, ray.origin());
+                if (!result.intersectionExists)
+                {
+                    result.raySquareIntersection=intersection;
+                    result.objectIndex=i;
+                    result.typeOfIntersectedObject=SQUARE;
+                    result.intersectionExists=true;
+                    distanceMinimum=distanceObjet;
+                }
+                else if (distanceMinimum>distanceObjet)
+                {
+                    result.raySquareIntersection=intersection;
+                    result.objectIndex=i;
+                    result.typeOfIntersectedObject=SQUARE;
+                }
+            }
+        }
         
         return result;
     }
