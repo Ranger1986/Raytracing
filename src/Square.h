@@ -61,118 +61,45 @@ public:
     }
 
     RaySquareIntersection intersect(const Ray &ray) const {
-        RaySquareIntersection intersection;
-        //TODO calculer l'intersection rayon quand
-        
-        intersection.intersectionExists=false;
-        float t;
-        Vec3 bottomLeft=vertices[0].position;
-        Vec3 rvect=vertices[1].position-bottomLeft;
-        Vec3 uvect=vertices[3].position-bottomLeft;
-        Vec3 normal = Vec3::cross(rvect , uvect);
-        if (Vec3::dot(ray.direction(),normal)!=0){
-            t=Vec3::dot((bottomLeft-ray.origin()),normal)/Vec3::dot(ray.direction(),normal);
-        }
-        if (t>0)
-        {
-            Vec3 supposed_intersection = ray.origin()+t*ray.direction();
-            bool is_x_bound= ((vertices[0].position[0]<=supposed_intersection[0]&&supposed_intersection[0]<=vertices[1].position[0])||
-            (vertices[0].position[0]<=supposed_intersection[0]&&supposed_intersection[0]<=vertices[2].position[0])||
-            (vertices[0].position[0]<=supposed_intersection[0]&&supposed_intersection[0]<=vertices[3].position[0]))||
-            (((vertices[0].position[0]>=supposed_intersection[0]&&supposed_intersection[0]>=vertices[1].position[0])||
-            (vertices[0].position[0]>=supposed_intersection[0]&&supposed_intersection[0]>=vertices[2].position[0])||
-            (vertices[0].position[0]>=supposed_intersection[0]&&supposed_intersection[0]>=vertices[3].position[0])));
+        RaySquareIntersection intersectionResult;
+        intersectionResult.intersectionExists = false;
+        Vec3 bottom_left=vertices[0].position;
+        Vec3 rvector =vertices[1].position-bottom_left;
+        Vec3 uvector = vertices[3].position-bottom_left;
+        Vec3 normal = normal.cross(rvector,uvector);
 
-            bool is_y_bound= (((vertices[0].position[1]<=supposed_intersection[1]&&supposed_intersection[1]<=vertices[1].position[1])||
-            (vertices[0].position[1]<=supposed_intersection[1]&&supposed_intersection[1]<=vertices[2].position[1])||
-            (vertices[0].position[1]<=supposed_intersection[1]&&supposed_intersection[1]<=vertices[3].position[1]))||
-            ((vertices[0].position[1]>=supposed_intersection[1]&&supposed_intersection[1]>=vertices[1].position[1])||
-            (vertices[0].position[1]>=supposed_intersection[1]&&supposed_intersection[1]>=vertices[2].position[1])||
-            (vertices[0].position[1]>=supposed_intersection[1]&&supposed_intersection[1]>=vertices[3].position[1])));
+        // Calculez le dénominateur de l'équation du plan
+        float denominator = Vec3::dot(normal, ray.direction());
 
-            bool is_z_bound= (((vertices[0].position[2]<=supposed_intersection[2]&&supposed_intersection[2]<=vertices[1].position[2])||
-            (vertices[0].position[2]<=supposed_intersection[2]&&supposed_intersection[2]<=vertices[2].position[2])||
-            (vertices[0].position[2]<=supposed_intersection[2]&&supposed_intersection[2]<=vertices[3].position[2]))||
-            ((vertices[0].position[2]>=supposed_intersection[2]&&supposed_intersection[2]>=vertices[1].position[2])||
-            (vertices[0].position[2]>=supposed_intersection[2]&&supposed_intersection[2]>=vertices[2].position[2])||
-            (vertices[0].position[2]>=supposed_intersection[2]&&supposed_intersection[2]>=vertices[3].position[2])));
+        // Assurez-vous que le rayon n'est pas parallèle au plan
+        if (std::abs(denominator) > 1e-6) {
+            // Calcul de la distance entre le point d'origine du rayon et le plan
+            Vec3 toPlane = bottom_left - ray.origin();
+            float t = Vec3::dot(toPlane, normal) / denominator;
 
-            /*
-            for (int i = 0; i < 3; i++)
-            {
-                float s_i=supposed_intersection[i];
-                float v1=vertices[0].position[i];
-                float v2=vertices[1].position[i];
-                float v3=vertices[2].position[i];
-                float v4=vertices[3].position[i];
-                if ((supposed_intersection[i]<vertices[0].position[i])&&
-                    (supposed_intersection[i]<vertices[1].position[i])&&
-                    (supposed_intersection[i]<vertices[2].position[i])&&
-                    (supposed_intersection[i]<vertices[3].position[i]))
-                {
-                    if (i==2)
-                    {
-                        std::cout<<"inf"<<std::endl;
-                        std::cout<<supposed_intersection[i]<<std::endl;
-                        std::cout<<vertices[0].position[i]<<std::endl;
-                        std::cout<<vertices[1].position[i]<<std::endl;
-                        std::cout<<vertices[2].position[i]<<std::endl;
-                        std::cout<<vertices[3].position[i]<<std::endl;
-                        std::cout<<(s_i<v1)<<std::endl;
-                        std::cout<<(s_i<v2)<<std::endl;
-                        std::cout<<(s_i<v3)<<std::endl;
-                        std::cout<<(s_i<v4)<<std::endl;
-                        std::cout<<false<<std::endl;
+            // Vérifiez si le point d'intersection est en avant du rayon
+            if (t >= 0) {
+                // Calculez le point d'intersection
+                Vec3 intersectionPoint = ray.origin() + ray.direction() * t;
 
-                    }
-                    return intersection;
+                // Calculez les coordonnées (u, v) sur le plan
+                Vec3 intersectionToVertex = intersectionPoint - bottom_left;
+                float u = Vec3::dot(intersectionToVertex, rvector) / rvector.squareLength();
+                float v = Vec3::dot(intersectionToVertex, uvector) / uvector.squareLength();
+
+                // Vérifiez si le point d'intersection est à l'intérieur du carré
+                if (u >= 0 && u <= 1 && v >= 0 && v <= 1) {
+                    intersectionResult.intersectionExists = true;
+                    intersectionResult.t = t;
+                    intersectionResult.u = u;
+                    intersectionResult.v = v;
+                    intersectionResult.intersection = intersectionPoint;
+                    intersectionResult.normal = normal;
                 }
-                if ((supposed_intersection[i]>vertices[0].position[i])&&
-                    (supposed_intersection[i]>vertices[1].position[i])&&
-                    (supposed_intersection[i]>vertices[2].position[i])&&
-                    (supposed_intersection[i]>vertices[3].position[i]))
-                {
-                    if (i==2)
-                    {
-                        std::cout<<"supp"<<std::endl;
-                        std::cout<<supposed_intersection[i]<<std::endl;
-                        std::cout<<vertices[0].position[i]<<std::endl;
-                        std::cout<<vertices[1].position[i]<<std::endl;
-                        std::cout<<vertices[2].position[i]<<std::endl;
-                        std::cout<<vertices[3].position[i]<<std::endl;
-                        std::cout<<((supposed_intersection[i]>vertices[0].position[i])&&
-                        (supposed_intersection[i]>vertices[1].position[i])&&
-                        (supposed_intersection[i]>vertices[2].position[i])&&
-                        (supposed_intersection[i]>vertices[3].position[i]))<<std::endl;
-                    }
-                    return intersection;
-                }
-                */
-                /*
-                if ((vertices[0].position[i]<supposed_intersection[i]<vertices[2].position[i]))
-                {
-                    return intersection;
-                }
-                if ((vertices[0].position[i]<vertices[2].position[i])<supposed_intersection[i])
-                {
-                    return intersection;
-                }
-                */
-                /*
-                if (((vertices[2].position[i]<vertices[0].position[i]<supposed_intersection[i])||(vertices[0].position[i]<vertices[2].position[i]<supposed_intersection[i])))
-                {
-                    return intersection;
-                }
-                */
-            if (is_x_bound&&is_y_bound&&is_z_bound)
-            {
-                intersection.intersectionExists=true;
-                intersection.intersection=supposed_intersection;
             }
-            
-            
         }
-        return intersection;
-    }
+
+        return intersectionResult;
+}
 };
 #endif // SQUARE_H

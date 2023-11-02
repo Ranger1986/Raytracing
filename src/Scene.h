@@ -122,8 +122,9 @@ public:
                     result.intersectionExists=true;
                     distanceMinimum=distanceObjet;
                 }
-                else if (distanceMinimum>distanceObjet)
+                else if (distanceMinimum<distanceObjet)
                 {
+                    //std::cout << distanceMinimum << '>' << distanceObjet << std::endl;
                     result.raySquareIntersection=intersection;
                     result.objectIndex=i;
                     result.typeOfIntersectedObject=SQUARE;
@@ -285,13 +286,26 @@ public:
         { //Front Wall
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
-            s.setQuad(Vec3(-1., -1., -1.75), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.setQuad(Vec3(-1., -1., 0), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
             s.scale(Vec3(2., 2., 1.));
-            //s.translate(Vec3(0., 0., -2.));
+            s.translate(Vec3(0., 0., -2.));
             s.build_arrays();
             s.material.diffuse_material = Vec3( 1.,1.,1. );
             s.material.specular_material = Vec3( 1.,1.,1. );
             s.material.shininess = 16;
+        }
+
+        {
+            spheres.resize( spheres.size() + 1 );
+
+            Sphere & s1 = spheres[spheres.size() - 1];
+            s1.m_center = Vec3(1.0 , 0. , 0.);
+            s1.m_radius = 1;
+            s1.build_arrays();
+            s1.material.type = Material_Mirror;
+            s1.material.diffuse_material = Vec3( 1.,0.0,0.0 );
+            s1.material.specular_material = Vec3( 0.2,0.2,0.2 );
+            s1.material.shininess = 20;
         }
     }
 
