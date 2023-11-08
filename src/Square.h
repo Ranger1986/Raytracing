@@ -67,27 +67,15 @@ public:
         Vec3 rvector =vertices[1].position-bottom_left;
         Vec3 uvector = vertices[3].position-bottom_left;
         Vec3 normal = normal.cross(rvector,uvector);
-
-        // Calculez le dénominateur de l'équation du plan
         float denominator = Vec3::dot(normal, ray.direction());
-
-        // Assurez-vous que le rayon n'est pas parallèle au plan
-        if (std::abs(denominator) > 1e-6) {
-            // Calcul de la distance entre le point d'origine du rayon et le plan
+        if (std::abs(denominator) != 0) {
             Vec3 toPlane = bottom_left - ray.origin();
             float t = Vec3::dot(toPlane, normal) / denominator;
-
-            // Vérifiez si le point d'intersection est en avant du rayon
             if (t >= 0) {
-                // Calculez le point d'intersection
                 Vec3 intersectionPoint = ray.origin() + ray.direction() * t;
-
-                // Calculez les coordonnées (u, v) sur le plan
                 Vec3 intersectionToVertex = intersectionPoint - bottom_left;
                 float u = Vec3::dot(intersectionToVertex, rvector) / rvector.squareLength();
                 float v = Vec3::dot(intersectionToVertex, uvector) / uvector.squareLength();
-
-                // Vérifiez si le point d'intersection est à l'intérieur du carré
                 if (u >= 0 && u <= 1 && v >= 0 && v <= 1) {
                     intersectionResult.intersectionExists = true;
                     intersectionResult.t = t;

@@ -122,9 +122,8 @@ public:
                     result.intersectionExists=true;
                     distanceMinimum=distanceObjet;
                 }
-                else if (distanceMinimum<distanceObjet)
+                else if (distanceMinimum>distanceObjet)
                 {
-                    //std::cout << distanceMinimum << '>' << distanceObjet << std::endl;
                     result.raySquareIntersection=intersection;
                     result.objectIndex=i;
                     result.typeOfIntersectedObject=SQUARE;
@@ -191,8 +190,8 @@ public:
         {
             spheres.resize( spheres.size() + 1 );
             Sphere & s = spheres[spheres.size() - 1];
-            s.m_center = Vec3(1.0 , 0. , 0.);
-            s.m_radius = 0.5;
+            s.m_center = Vec3(0. , 0. , 0.);
+            s.m_radius = 0.01;
             s.build_arrays();
             s.material.type = Material_Mirror;
             s.material.diffuse_material = Vec3( 1.,0.0,0.0 );
@@ -283,12 +282,25 @@ public:
             light.material = Vec3(1,1,1);
             light.isInCamSpace = false;
         }
+        /*
         { //Front Wall
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
             s.setQuad(Vec3(-1., -1., 0), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
             s.scale(Vec3(2., 2., 1.));
             s.translate(Vec3(0., 0., -2.));
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.,0.,1. );
+            s.material.specular_material = Vec3( 1.,0.,1. );
+            s.material.shininess = 16;
+        }
+        */
+        { //Front Wall
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-1., -1., 0), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.scale(Vec3(2., 2., 1.));
+            s.translate(Vec3(1., 1., -0.5));
             s.build_arrays();
             s.material.diffuse_material = Vec3( 1.,1.,1. );
             s.material.specular_material = Vec3( 1.,1.,1. );
@@ -299,7 +311,7 @@ public:
             spheres.resize( spheres.size() + 1 );
 
             Sphere & s1 = spheres[spheres.size() - 1];
-            s1.m_center = Vec3(1.0 , 0. , 0.);
+            s1.m_center = Vec3(1.0 , 0. , 0);
             s1.m_radius = 1;
             s1.build_arrays();
             s1.material.type = Material_Mirror;
