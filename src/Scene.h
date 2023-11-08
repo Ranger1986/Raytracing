@@ -142,24 +142,26 @@ public:
         //TODO 
         
         Vec3 color;
+        Material mat;
         RaySceneIntersection raySceneIntersection = computeIntersection(ray);
         if (raySceneIntersection.intersectionExists)
         {
             switch (raySceneIntersection.typeOfIntersectedObject)
             {
             case MESHE:
-                color = meshes[raySceneIntersection.objectIndex].material.diffuse_material;
+                mat = meshes[raySceneIntersection.objectIndex].material;
                 break;
             case SPHERE:
-                color = spheres[raySceneIntersection.objectIndex].material.diffuse_material;
+                mat = spheres[raySceneIntersection.objectIndex].material;
                 break;
             case SQUARE:
-                color = squares[raySceneIntersection.objectIndex].material.diffuse_material;
+                mat = squares[raySceneIntersection.objectIndex].material;
                 break;
             default:
                 break;
             }
         }
+        color=mat.diffuse_material;
         return color;
     }
 
@@ -416,6 +418,7 @@ public:
             s.material.shininess = 16;
         }
         */
+        
         
 
 
