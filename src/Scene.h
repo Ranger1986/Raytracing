@@ -6,7 +6,7 @@
 #include "Mesh.h"
 #include "Sphere.h"
 #include "Square.h"
-
+#include <stdexcept>
 
 #include <GL/glut.h>
 
@@ -108,6 +108,28 @@ public:
                 }
             }
         }
+        for (int i = 0; i < squares.size(); i++)
+        {
+            RaySquareIntersection intersection = squares[i].intersect(ray);
+            if (intersection.intersectionExists)
+            {
+                distanceObjet = calculDistance(intersection.intersection, ray.origin());
+                if (!result.intersectionExists)
+                {
+                    result.raySquareIntersection=intersection;
+                    result.objectIndex=i;
+                    result.typeOfIntersectedObject=SQUARE;
+                    result.intersectionExists=true;
+                    distanceMinimum=distanceObjet;
+                }
+                else if (distanceMinimum>distanceObjet)
+                {
+                    result.raySquareIntersection=intersection;
+                    result.objectIndex=i;
+                    result.typeOfIntersectedObject=SQUARE;
+                }
+            }
+        }
         
         return result;
     }
@@ -168,8 +190,8 @@ public:
         {
             spheres.resize( spheres.size() + 1 );
             Sphere & s = spheres[spheres.size() - 1];
-            s.m_center = Vec3(1.0 , 0. , 0.);
-            s.m_radius = 0.5;
+            s.m_center = Vec3(0. , 0. , 0.);
+            s.m_radius = 0.01;
             s.build_arrays();
             s.material.type = Material_Mirror;
             s.material.diffuse_material = Vec3( 1.,0.0,0.0 );
@@ -206,7 +228,7 @@ public:
             s1.material.shininess = 20;
 
             Sphere & s2 = spheres[spheres.size() - 2];
-            s2.m_center = Vec3(-1.0 , 0. , 0.);
+            s2.m_center = Vec3(-1.0 , 0. , -20.);
             s2.m_radius = 1;
             s2.build_arrays();
             s2.material.type = Material_Mirror;
@@ -241,6 +263,61 @@ public:
             s.material.diffuse_material = Vec3( 0.8,0.8,0.8 );
             s.material.specular_material = Vec3( 0.8,0.8,0.8 );
             s.material.shininess = 20;
+        }
+    }
+
+    void setup_double_square() {
+        meshes.clear();
+        spheres.clear();
+        squares.clear();
+        lights.clear();
+
+        {
+            lights.resize( lights.size() + 1 );
+            Light & light = lights[lights.size() - 1];
+            light.pos = Vec3(-5,5,5);
+            light.radius = 2.5f;
+            light.powerCorrection = 2.f;
+            light.type = LightType_Spherical;
+            light.material = Vec3(1,1,1);
+            light.isInCamSpace = false;
+        }
+        /*
+        { //Front Wall
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-1., -1., 0), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.scale(Vec3(2., 2., 1.));
+            s.translate(Vec3(0., 0., -2.));
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.,0.,1. );
+            s.material.specular_material = Vec3( 1.,0.,1. );
+            s.material.shininess = 16;
+        }
+        */
+        { //Front Wall
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-1., -1., 0), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.scale(Vec3(2., 2., 1.));
+            s.translate(Vec3(1., 1., -0.5));
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.,1.,1. );
+            s.material.specular_material = Vec3( 1.,1.,1. );
+            s.material.shininess = 16;
+        }
+
+        {
+            spheres.resize( spheres.size() + 1 );
+
+            Sphere & s1 = spheres[spheres.size() - 1];
+            s1.m_center = Vec3(1.0 , 0. , 0);
+            s1.m_radius = 1;
+            s1.build_arrays();
+            s1.material.type = Material_Mirror;
+            s1.material.diffuse_material = Vec3( 1.,0.0,0.0 );
+            s1.material.specular_material = Vec3( 0.2,0.2,0.2 );
+            s1.material.shininess = 20;
         }
     }
 
@@ -325,7 +402,7 @@ public:
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
         }
-
+        /*
         { //Front Wall
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
@@ -338,6 +415,8 @@ public:
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
         }
+        */
+        
 
 
         { //GLASS Sphere

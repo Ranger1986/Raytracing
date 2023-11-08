@@ -61,11 +61,33 @@ public:
     }
 
     RaySquareIntersection intersect(const Ray &ray) const {
-        RaySquareIntersection intersection;
+        RaySquareIntersection intersectionResult;
+        intersectionResult.intersectionExists = false;
+        Vec3 bottom_left=vertices[0].position;
+        Vec3 rvector =vertices[1].position-bottom_left;
+        Vec3 uvector = vertices[3].position-bottom_left;
+        Vec3 normal = normal.cross(rvector,uvector);
+        float denominator = Vec3::dot(normal, ray.direction());
+        if (std::abs(denominator) != 0) {
+            Vec3 toPlane = bottom_left - ray.origin();
+            float t = Vec3::dot(toPlane, normal) / denominator;
+            if (t >= 0) {
+                Vec3 intersectionPoint = ray.origin() + ray.direction() * t;
+                Vec3 intersectionToVertex = intersectionPoint - bottom_left;
+                float u = Vec3::dot(intersectionToVertex, rvector) / rvector.squareLength();
+                float v = Vec3::dot(intersectionToVertex, uvector) / uvector.squareLength();
+                if (u >= 0 && u <= 1 && v >= 0 && v <= 1) {
+                    intersectionResult.intersectionExists = true;
+                    intersectionResult.t = t;
+                    intersectionResult.u = u;
+                    intersectionResult.v = v;
+                    intersectionResult.intersection = intersectionPoint;
+                    intersectionResult.normal = normal;
+                }
+            }
+        }
 
-        //TODO calculer l'intersection rayon quad
-
-        return intersection;
-    }
+        return intersectionResult;
+}
 };
 #endif // SQUARE_H

@@ -4,6 +4,7 @@
 #include <vector>
 #include "Mesh.h"
 #include <cmath>
+#include "aide.h"
 
 struct RaySphereIntersection{
     bool intersectionExists;
@@ -105,8 +106,8 @@ public:
         if (discriminant>0)
         {
             intersection.intersectionExists=true;
-            Vec3 intersection1=direction*(-b+sqrt(discriminant)/(2*a));
-            Vec3 intersection2=direction*(-b-sqrt(discriminant)/(2*a));
+            Vec3 intersection1=ray.origin() + direction*((-b+sqrt(discriminant))/(2*a));
+            Vec3 intersection2=ray.origin() +direction*((-b-sqrt(discriminant))/(2*a));
             if (calculDistance(ray.origin(), intersection1)<calculDistance(ray.origin(), intersection2))
             {
                 intersection.intersection=intersection1;
@@ -118,6 +119,21 @@ public:
                 intersection.secondintersection=intersection1;
             }
         }
+        /*
+        if (intersection.intersectionExists){
+            std::cout << "intersection:" << std::endl;
+            printVec(intersection.intersection);
+            std::cout << "origine:" << std::endl;
+            printVec(origin);
+            std::cout << "direction:" << std::endl;
+            printVec(direction);
+            std::cout << "racine:" << std::endl;
+            std::cout << ((-b+sqrt(discriminant))/(2*a)) << std::endl;
+            std::cout << ((-b-sqrt(discriminant))/(2*a)) << std::endl;
+            std::cout << "distance:" << std::endl;
+            std::cout << calculDistance(intersection.intersection,origin) << std::endl;
+        }
+        */
         return intersection;
     }
 };
