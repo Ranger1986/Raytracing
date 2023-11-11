@@ -135,8 +135,83 @@ public:
     }
 
 
+    Vec3 phong (RaySceneIntersection result) {
+        float Isa, Ka;
+        float Isd, Kd;
+        float Iss, Ks;
+        Vec3 P, L, N, V, R;
+        Vec3 color = Vec3(0., 0., 0.);
 
+        if (!result.intersectionExists) {
+            return color;
+        }
 
+        for(unsigned int  i = 0; i < lights.size(); i++) {
+            if (result.typeOfIntersectedObject == SPHERE) {
+                RaySphereIntersection result_temp = result.raySphereIntersection;
+                Sphere sph = spheres[result.objectIndex];
+
+                P = result_temp.intersection;
+
+                L = lights[0].pos - P;
+                L.normalize();
+
+                N = result_temp.normal;
+
+                V = -1. * (P);
+                V.normalize();
+
+                R = 2. * Vec3::dot(N, L) * N - L;
+                R.normalize();
+                
+                for(int i = 0; i < 3; i++) {
+                    Isa = lights[0].material[i];
+                    Ka = sph.material.ambient_material[i];
+
+                    Isd = lights[0].material[i];
+                    Kd = sph.material.diffuse_material[i];
+
+                    Iss = lights[0].material[i];
+                    Ks = sph.material.specular_material[i];
+
+                    color[i] += Isa * Ka + Isd * Kd * Vec3::dot(L, N) + Iss * Ks * pow( fmax(0., Vec3::dot(R, V)), sph.material.shininess);
+                }
+            }
+
+            else if (result.typeOfIntersectedObject == SQUARE) {
+                RaySquareIntersection result_temp = result.raySquareIntersection;
+                Square squ = squares[result.objectIndex];
+
+                P = result_temp.intersection;
+
+                L = lights[0].pos - P;
+                L.normalize();
+
+                N = result_temp.normal;
+
+                V = -1. * (P);
+                V.normalize();
+
+                R = 2. * Vec3::dot(N, L) * N - L;
+                R.normalize();
+                
+                for(int i = 0; i < 3; i++) {
+                    Isa = lights[0].material[i];
+                    Ka = squ.material.ambient_material[i];
+
+                    Isd = lights[0].material[i];
+                    Kd = squ.material.diffuse_material[i];
+
+                    Iss = lights[0].material[i];
+                    Ks = squ.material.specular_material[i];
+
+                    color[i] += Isa * Ka + Isd * Kd * Vec3::dot(L, N) + Iss * Ks * pow( fmax(0., Vec3::dot(R, V)), squ.material.shininess);
+                }
+            }
+        }
+
+        return color;
+    }
 
     Vec3 rayTraceRecursive( Ray ray , int NRemainingBounces ) {
         //TODO 
@@ -146,22 +221,8 @@ public:
         RaySceneIntersection raySceneIntersection = computeIntersection(ray);
         if (raySceneIntersection.intersectionExists)
         {
-            switch (raySceneIntersection.typeOfIntersectedObject)
-            {
-            case MESHE:
-                mat = meshes[raySceneIntersection.objectIndex].material;
-                break;
-            case SPHERE:
-                mat = spheres[raySceneIntersection.objectIndex].material;
-                break;
-            case SQUARE:
-                mat = squares[raySceneIntersection.objectIndex].material;
-                break;
-            default:
-                break;
-            }
+            color = phong(raySceneIntersection);
         }
-        color=mat.diffuse_material;
         return color;
     }
 

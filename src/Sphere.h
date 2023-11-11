@@ -118,22 +118,9 @@ public:
                 intersection.intersection=intersection2;
                 intersection.secondintersection=intersection1;
             }
+            intersection.normal = (intersection.intersection - m_center);
+            intersection.normal.normalize();
         }
-        /*
-        if (intersection.intersectionExists){
-            std::cout << "intersection:" << std::endl;
-            printVec(intersection.intersection);
-            std::cout << "origine:" << std::endl;
-            printVec(origin);
-            std::cout << "direction:" << std::endl;
-            printVec(direction);
-            std::cout << "racine:" << std::endl;
-            std::cout << ((-b+sqrt(discriminant))/(2*a)) << std::endl;
-            std::cout << ((-b-sqrt(discriminant))/(2*a)) << std::endl;
-            std::cout << "distance:" << std::endl;
-            std::cout << calculDistance(intersection.intersection,origin) << std::endl;
-        }
-        */
         return intersection;
     }
 };

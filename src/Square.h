@@ -83,6 +83,7 @@ public:
                     intersectionResult.v = v;
                     intersectionResult.intersection = intersectionPoint;
                     intersectionResult.normal = normal;
+                    intersectionResult.normal.normalize();
                 }
             }
         }
