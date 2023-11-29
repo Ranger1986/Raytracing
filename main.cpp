@@ -327,12 +327,13 @@ int main (int argc, char ** argv) {
 
     camera.move(0., 0., -3.1);
     selected_scene=4;
-    scenes.resize(5);
+    scenes.resize(6);
     scenes[0].setup_single_sphere();
     scenes[1].setup_double_sphere();
     scenes[2].setup_single_square();
     scenes[3].setup_double_square();
     scenes[4].setup_cornell_box();
+    scenes[5].setup_square_shadow();
 
     glutMainLoop ();
     return EXIT_SUCCESS;

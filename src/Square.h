@@ -71,7 +71,7 @@ public:
         if (std::abs(denominator) != 0) {
             Vec3 toPlane = bottom_left - ray.origin();
             float t = Vec3::dot(toPlane, normal) / denominator;
-            if (t >= 0) {
+            if (t >= 1e-6) {
                 Vec3 intersectionPoint = ray.origin() + ray.direction() * t;
                 Vec3 intersectionToVertex = intersectionPoint - bottom_left;
                 float u = Vec3::dot(intersectionToVertex, rvector) / rvector.squareLength();

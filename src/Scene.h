@@ -47,7 +47,17 @@ struct RaySceneIntersection{
     RaySceneIntersection() : intersectionExists(false) , t(FLT_MAX) {}
 };
 
-
+Vec3 getIntersection(RaySceneIntersection sceneInt){
+    if (sceneInt.intersectionExists)
+    {
+        if (sceneInt.typeOfIntersectedObject == SPHERE) {
+        return sceneInt.raySphereIntersection.intersection;
+        }
+        if (sceneInt.typeOfIntersectedObject == SQUARE) {
+        return sceneInt.raySphereIntersection.intersection;
+        }
+    }
+}
 
 class Scene {
     std::vector< Mesh > meshes;
@@ -156,9 +166,22 @@ public:
 
                 P = result_temp.intersection;
 
-                Ray rayonOmbre= Ray(P, P-lights[iLight].pos );
+                Vec3 L = lights[iLight].pos - P;
+                L.normalize();
+
+                Ray ray_lum = Ray(P, L);
+                RaySceneIntersection RSI_lum = computeIntersection(ray_lum);
+
+                result_temp.intersectionExists = RSI_lum.intersectionExists;
+
+                /*
+                Ray rayonOmbre= Ray(P, lights[iLight].pos-P );
                 RaySceneIntersection intersectionOmbre= computeIntersection(rayonOmbre);
-                if (intersectionOmbre.intersectionExists){
+                
+                if(intersectionOmbre.intersectionExists && (calculDistance(result_temp.intersection, lights[iLight].pos)>
+                    calculDistance(getIntersection(intersectionOmbre), lights[iLight].pos))){result_temp.intersectionExists=false;}
+                */
+                if (result_temp.intersectionExists){
                     L = lights[iLight].pos - P;
                     L.normalize();
 
@@ -190,9 +213,18 @@ public:
 
                 P = result_temp.intersection;
                 
-                Ray rayonOmbre= Ray(P, P - lights[iLight].pos);
+                Vec3 L = lights[iLight].pos - P;
+                L.normalize();
+
+                Ray rayonOmbre= Ray(P, L);
                 RaySceneIntersection intersectionOmbre= computeIntersection(rayonOmbre);
-                if (intersectionOmbre.intersectionExists){
+                
+                if(intersectionOmbre.intersectionExists/*&&
+                    (calculDistance(result_temp.intersection, lights[iLight].pos)>
+                    calculDistance(getIntersection(intersectionOmbre), lights[iLight].pos))*/)
+                    {result_temp.intersectionExists=false;}
+
+                if (result_temp.intersectionExists){
                     L = lights[iLight].pos - P;
                     L.normalize();
 
@@ -543,6 +575,48 @@ public:
             s.material.index_medium = 0.;
         }
 
+    }
+void setup_square_shadow(){
+        meshes.clear();
+        spheres.clear();
+        squares.clear();
+        lights.clear();
+
+        {
+            lights.resize( lights.size() + 1 );
+            Light & light = lights[lights.size() - 1];
+            light.pos = Vec3( 0.0, 1.5, 0.0 );
+            light.radius = 2.5f;
+            light.powerCorrection = 2.f;
+            light.type = LightType_Spherical;
+            light.material = Vec3(1,1,1);
+            light.isInCamSpace = false;
+        }
+
+        { //Floor
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-1., -1., 0.), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.translate(Vec3(0., 0., -2.));
+            s.scale(Vec3(2., 2., 1.));
+            s.rotate_x(-90);
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.0,1.0,1.0 );
+            s.material.specular_material = Vec3( 1.0,1.0,1.0 );
+            s.material.shininess = 16;
+        }
+        { //Floor
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-0.25, -0.25, 0.), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 0.5, 0.5);
+            s.translate(Vec3(0., 0., -1.));
+            s.scale(Vec3(2., 2., 1.));
+            s.rotate_x(-90);
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.0,1.0,1.0 );
+            s.material.specular_material = Vec3( 1.0,1.0,1.0 );
+            s.material.shininess = 16;
+        }
     }
 
 };
