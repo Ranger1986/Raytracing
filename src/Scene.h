@@ -54,7 +54,7 @@ Vec3 getIntersection(RaySceneIntersection sceneInt){
         return sceneInt.raySphereIntersection.intersection;
         }
         if (sceneInt.typeOfIntersectedObject == SQUARE) {
-        return sceneInt.raySphereIntersection.intersection;
+        return sceneInt.raySquareIntersection.intersection;
         }
     }
 }
@@ -146,7 +146,67 @@ public:
         return result;
     }
 
+    bool computeHardShadow(Vec3 P, Light light){
+        Vec3 L = light.pos - P;
+        L.normalize();
+        Ray rayonOmbre= Ray(P, L);
+        RaySceneIntersection intersectionOmbre= computeIntersection(rayonOmbre);
+        if(intersectionOmbre.intersectionExists)
+            {
+            Vec3 O = light.pos - getIntersection(intersectionOmbre);
+            if (O[0]/L[0]>0)
+            {
+                return true;
+            }}
+        return false;
+    }
+        float computeSoftShadow (RaySceneIntersection RSI) {
+        Vec3 P;
+        Vec3 shade;
+        Light lightSource = this->lights[0];
 
+        
+        if (RSI.typeOfIntersectedObject == 0) {
+            RayTriangleIntersection RSI_temp = RSI.rayMeshIntersection;
+            P = RSI_temp.intersection;
+        }
+        else if (RSI.typeOfIntersectedObject == 1) {
+            RaySphereIntersection RSI_temp = RSI.raySphereIntersection;
+            P = RSI_temp.intersection;
+        }
+        else if (RSI.typeOfIntersectedObject == 2) {
+            RaySquareIntersection RSI_temp = RSI.raySquareIntersection;
+            P = RSI_temp.intersection;
+        }
+
+        float x_rand, y_rand, z_rand;
+        float n_shades = 0.;
+        float n_rays = 20.;
+
+        // Création de n_rays lumières aléatoires (on souhaite qu'elles soient les mêmes pour toutes les ombres testées)
+        std::vector<Vec3> rand_lights;
+        rand_lights.resize(n_rays);
+        for (int itr = 0; itr < n_rays; itr++) {
+            Vec3 & rand_light = rand_lights[itr];
+            rand_light[0] = (((float) rand() / RAND_MAX) *2)-1;
+            rand_light[1] = (((float) rand() / RAND_MAX) *2)-1;
+            rand_light[2] = (((float) rand() / RAND_MAX) *2)-1;
+        }
+
+        for (int i = 0; i < n_rays; i++) {
+            // x_rand = (((float) rand() / RAND_MAX) *2)-1;
+            // y_rand = (((float) rand() / RAND_MAX) *2)-1;
+            // z_rand = (((float) rand() / RAND_MAX) *2)-1;
+
+            lightSource.pos = Vec3(rand_lights[i][0], rand_lights[i][1], rand_lights[i][2]);
+
+            //lightSource.pos = Vec3(x_rand, y_rand, z_rand);
+            if (computeHardShadow(P, lightSource)) n_shades+=1.;
+        }
+        //if (n_shades <= 10) return 0.;
+        //else
+        return n_shades/n_rays;
+    }
     Vec3 phong (RaySceneIntersection intersectionObjet) {
         float Isa, Ka;
         float Isd, Kd;
@@ -169,23 +229,22 @@ public:
                 Vec3 L = lights[iLight].pos - P;
                 L.normalize();
 
-                Ray ray_lum = Ray(P, L);
-                RaySceneIntersection RSI_lum = computeIntersection(ray_lum);
-
-                result_temp.intersectionExists = RSI_lum.intersectionExists;
-
-                /*
-                Ray rayonOmbre= Ray(P, lights[iLight].pos-P );
+                Ray rayonOmbre= Ray(L,P);
                 RaySceneIntersection intersectionOmbre= computeIntersection(rayonOmbre);
-                
-                if(intersectionOmbre.intersectionExists && (calculDistance(result_temp.intersection, lights[iLight].pos)>
-                    calculDistance(getIntersection(intersectionOmbre), lights[iLight].pos))){result_temp.intersectionExists=false;}
-                */
+                if(intersectionOmbre.intersectionExists){
+                        Vec3 O1 = lights[iLight].pos - getIntersection(intersectionOmbre);
+                        Vec3 O2 = O1;
+                        if (intersectionObjet.objectIndex!=intersectionOmbre.objectIndex&&intersectionOmbre.typeOfIntersectedObject==SPHERE)//intersectionOmbre.typeOfIntersectedObject==SPHERE)
+                        {
+                            result_temp.intersectionExists=false;
+                        }
+                    }
                 if (result_temp.intersectionExists){
                     L = lights[iLight].pos - P;
                     L.normalize();
 
                     N = result_temp.normal;
+                    N.normalize();
 
                     V = -1. * (P);
                     V.normalize();
@@ -215,15 +274,18 @@ public:
                 
                 Vec3 L = lights[iLight].pos - P;
                 L.normalize();
-
+                /*
                 Ray rayonOmbre= Ray(P, L);
                 RaySceneIntersection intersectionOmbre= computeIntersection(rayonOmbre);
                 
-                if(intersectionOmbre.intersectionExists/*&&
-                    (calculDistance(result_temp.intersection, lights[iLight].pos)>
-                    calculDistance(getIntersection(intersectionOmbre), lights[iLight].pos))*/)
-                    {result_temp.intersectionExists=false;}
-
+                if(intersectionOmbre.intersectionExists)
+                    {Vec3 O = lights[iLight].pos - getIntersection(intersectionOmbre);
+                    if (O[0]/L[0]>0)
+                    {
+                        result_temp.intersectionExists=false;
+                    }}
+                    */
+                //result_temp.intersectionExists=!computeHardShadow(P, lights[iLight]);
                 if (result_temp.intersectionExists){
                     L = lights[iLight].pos - P;
                     L.normalize();
@@ -263,6 +325,11 @@ public:
         if (raySceneIntersection.intersectionExists)
         {
             color = phong(raySceneIntersection);
+        }
+        //hard shadow
+
+        if (raySceneIntersection.intersectionExists&&raySceneIntersection.typeOfIntersectedObject==SQUARE){
+            color = (1-computeSoftShadow(raySceneIntersection)) * color;
         }
         return color;
     }
@@ -463,6 +530,7 @@ public:
             light.isInCamSpace = false;
         }
         */
+       
         { //Back Wall
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
@@ -474,6 +542,7 @@ public:
             s.material.specular_material = Vec3( 1.,1.,1. );
             s.material.shininess = 16;
         }
+        
 
         { //Left Wall
 
@@ -574,9 +643,8 @@ public:
             s.material.transparency = 0.;
             s.material.index_medium = 0.;
         }
-
     }
-void setup_square_shadow(){
+void setup_holy_spheres(){
         meshes.clear();
         spheres.clear();
         squares.clear();
@@ -593,6 +661,62 @@ void setup_square_shadow(){
             light.isInCamSpace = false;
         }
 
+        { //obstacle
+            spheres.resize( spheres.size() + 1 );
+            Sphere & s = spheres[spheres.size() - 1];
+            s.m_center = Vec3(0, -0.5, 0);
+            s.m_radius = 0.25f;
+            s.build_arrays();
+            s.material.type = Material_Mirror;
+            s.material.diffuse_material = Vec3( 1.,0.,0. );
+            s.material.specular_material = Vec3( 1.,0.,0. );
+            s.material.shininess = 16;
+            s.material.transparency = 1.0;
+            s.material.index_medium = 1.4;
+        }
+        { //obstacle
+            spheres.resize( spheres.size() + 1 );
+            Sphere & s = spheres[spheres.size() - 1];
+            s.m_center = Vec3(0, -2.5, 0);
+            s.m_radius = 0.75f;
+            s.build_arrays();
+            s.material.type = Material_Mirror;
+            s.material.diffuse_material = Vec3( 1.,0.,0. );
+            s.material.specular_material = Vec3( 1.,0.,0. );
+            s.material.shininess = 16;
+            s.material.transparency = 1.0;
+            s.material.index_medium = 1.4;
+        }
+    }
+void setup_sphere_shadow(){
+        meshes.clear();
+        spheres.clear();
+        squares.clear();
+        lights.clear();
+
+        {
+            lights.resize( lights.size() + 1 );
+            Light & light = lights[lights.size() - 1];
+            light.pos = Vec3( 0.0, 1.5, 0.0 );
+            light.radius = 2.5f;
+            light.powerCorrection = 2.f;
+            light.type = LightType_Spherical;
+            light.material = Vec3(1,1,1);
+            light.isInCamSpace = false;
+        }
+
+        { //Ceiling
+            squares.resize( squares.size() + 1 );
+            Square & s = squares[squares.size() - 1];
+            s.setQuad(Vec3(-1., -1., 0.), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 2., 2.);
+            s.translate(Vec3(0., 0., -2.));
+            s.scale(Vec3(2., 2., 1.));
+            s.rotate_x(90);
+            s.build_arrays();
+            s.material.diffuse_material = Vec3( 1.0,1.0,1.0 );
+            s.material.specular_material = Vec3( 1.0,1.0,1.0 );
+            s.material.shininess = 16;
+        }
         { //Floor
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
@@ -605,20 +729,20 @@ void setup_square_shadow(){
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
         }
-        { //Floor
-            squares.resize( squares.size() + 1 );
-            Square & s = squares[squares.size() - 1];
-            s.setQuad(Vec3(-0.25, -0.25, 0.), Vec3(1., 0, 0.), Vec3(0., 1, 0.), 0.5, 0.5);
-            s.translate(Vec3(0., 0., -1.));
-            s.scale(Vec3(2., 2., 1.));
-            s.rotate_x(-90);
+        { //obstacle
+            spheres.resize( spheres.size() + 1 );
+            Sphere & s = spheres[spheres.size() - 1];
+            s.m_center = Vec3(0, -0.5, 0);
+            s.m_radius = 0.25f;
             s.build_arrays();
-            s.material.diffuse_material = Vec3( 1.0,1.0,1.0 );
-            s.material.specular_material = Vec3( 1.0,1.0,1.0 );
+            s.material.type = Material_Mirror;
+            s.material.diffuse_material = Vec3( 1.,0.,0. );
+            s.material.specular_material = Vec3( 1.,0.,0. );
             s.material.shininess = 16;
+            s.material.transparency = 1.0;
+            s.material.index_medium = 1.4;
         }
     }
-
 };
 
 
