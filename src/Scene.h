@@ -101,6 +101,22 @@ public:
                 }
             }
         }
+        for (int i = 0; i < squares.size(); i++)
+        {
+            RaySquareIntersection temp = squares[i].intersect(ray);
+            if (temp.intersectionExists)
+            {  
+                tempDistance = sqrt((temp.intersection-ray.origin()).norm());
+                if (tempDistance < currentDistance)
+                {
+                    result.raySquareIntersection = temp;
+                    result.typeOfIntersectedObject = SQUARE;
+                    result.objectIndex=i;
+                    result.intersectionExists=temp.intersectionExists;
+                    currentDistance=tempDistance;
+                }
+            }
+        }
         return result;
     }
 
@@ -118,6 +134,9 @@ public:
             {
             case SPHERE:
                 color = spheres[raySceneIntersection.objectIndex].material.diffuse_material;
+                break;
+            case SQUARE:
+                color = squares[raySceneIntersection.objectIndex].material.diffuse_material;
                 break;
             
             default:
@@ -312,7 +331,7 @@ public:
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
         }
-
+        /*
         { //Front Wall
             squares.resize( squares.size() + 1 );
             Square & s = squares[squares.size() - 1];
@@ -325,6 +344,7 @@ public:
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
         }
+        */
 
 
         { //GLASS Sphere

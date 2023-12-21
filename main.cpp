@@ -319,7 +319,7 @@ int main (int argc, char ** argv) {
 
 
     camera.move(0., 0., -3.1);
-    selected_scene=1;
+    selected_scene=2;
     scenes.resize(4);
     scenes[0].setup_single_sphere();
     scenes[1].setup_double_sphere();
