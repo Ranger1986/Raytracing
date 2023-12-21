@@ -10,6 +10,9 @@
 
 #include <GL/glut.h>
 
+#define MESHE 0
+#define SPHERE 1
+#define SQUARE 2
 
 enum LightType {
     LightType_Spherical,
@@ -79,7 +82,25 @@ public:
 
     RaySceneIntersection computeIntersection(Ray const & ray) {
         RaySceneIntersection result;
+        float currentDistance = MAXFLOAT;
+        float tempDistance = 0;
         //TODO calculer les intersections avec les objets de la scene et garder la plus proche
+        for (int i = 0; i < spheres.size(); i++)
+        {
+            RaySphereIntersection temp = spheres[i].intersect(ray);
+            if (temp.intersectionExists)
+            {  
+                tempDistance = sqrt((temp.intersection-ray.origin()).norm());
+                if (tempDistance < currentDistance)
+                {
+                    result.raySphereIntersection = temp;
+                    result.typeOfIntersectedObject = SPHERE;
+                    result.objectIndex=i;
+                    result.intersectionExists=temp.intersectionExists;
+                    currentDistance=tempDistance;
+                }
+            }
+        }
         return result;
     }
 
@@ -88,16 +109,28 @@ public:
 
 
     Vec3 rayTraceRecursive( Ray ray , int NRemainingBounces ) {
-
         //TODO RaySceneIntersection raySceneIntersection = computeIntersection(ray);
+        RaySceneIntersection raySceneIntersection = computeIntersection(ray);
         Vec3 color;
+        if (raySceneIntersection.intersectionExists)
+        {
+            switch (raySceneIntersection.typeOfIntersectedObject)
+            {
+            case SPHERE:
+                color = spheres[raySceneIntersection.objectIndex].material.diffuse_material;
+                break;
+            
+            default:
+                break;
+            }
+        }
         return color;
     }
 
 
     Vec3 rayTrace( Ray const & rayStart ) {
         //TODO appeler la fonction recursive
-        Vec3 color;
+        Vec3 color=rayTraceRecursive(rayStart, 0);
         return color;
     }
 
@@ -125,6 +158,46 @@ public:
             s.build_arrays();
             s.material.type = Material_Mirror;
             s.material.diffuse_material = Vec3( 1.,1.,1 );
+            s.material.specular_material = Vec3( 0.2,0.2,0.2 );
+            s.material.shininess = 20;
+        }
+    }
+
+    void setup_double_sphere() {
+        meshes.clear();
+        spheres.clear();
+        squares.clear();
+        lights.clear();
+
+        {
+            lights.resize( lights.size() + 1 );
+            Light & light = lights[lights.size() - 1];
+            light.pos = Vec3(-5,5,5);
+            light.radius = 2.5f;
+            light.powerCorrection = 2.f;
+            light.type = LightType_Spherical;
+            light.material = Vec3(1,1,1);
+            light.isInCamSpace = false;
+        }
+        {
+            spheres.resize( spheres.size() + 1 );
+            Sphere & s = spheres[spheres.size() - 1];
+            s.m_center = Vec3(1 , 0. , 0.);
+            s.m_radius = 1.f;
+            s.build_arrays();
+            s.material.type = Material_Mirror;
+            s.material.diffuse_material = Vec3( 1.,0.,0 );
+            s.material.specular_material = Vec3( 0.2,0.2,0.2 );
+            s.material.shininess = 20;
+        }
+        {
+            spheres.resize( spheres.size() + 1 );
+            Sphere & s = spheres[spheres.size() - 1];
+            s.m_center = Vec3(-1 , 0. , 0.);
+            s.m_radius = 1.f;
+            s.build_arrays();
+            s.material.type = Material_Mirror;
+            s.material.diffuse_material = Vec3( 0.,1.,0 );
             s.material.specular_material = Vec3( 0.2,0.2,0.2 );
             s.material.shininess = 20;
         }
