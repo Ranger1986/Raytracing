@@ -82,6 +82,8 @@ public:
                 if (u<=1&&u>=0&&v<=1&&v>=0)
                 {
                     intersection.intersection = origine + t * direction;
+                    intersection.normal=normale;
+                    intersection.normal.normalize();
                     intersection.intersectionExists=true;
                 }
             }

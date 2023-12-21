@@ -101,6 +101,8 @@ public:
             float t = -b/(2*a);
             intersection.intersection = origine + t * direction;
             intersection.intersectionExists=true;
+            intersection.normal=intersection.intersection-centre;
+            intersection.normal.normalize();
         }
         else if (discriminant>0)
         {
@@ -109,6 +111,8 @@ public:
             intersection.intersection=origine + t1 * direction;
             intersection.secondintersection=origine + t2 * direction;
             intersection.intersectionExists=true;
+            intersection.normal=intersection.intersection-centre;
+            intersection.normal.normalize();
         }
         else
         {
