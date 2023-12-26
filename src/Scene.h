@@ -160,27 +160,14 @@ public:
                 R.normalize();
                 Vec3 V = ray.origin()-intersection;
                 V.normalize();
-                //std::cout << "i : " << i << std::endl;
                 for (int j = 0; j < 3; j++)
                 {
                     Id[j]+=lights[i].material[j]*material.diffuse_material[j]*fmax(0.,Vec3::dot(L,N));
-                    Is[j]+=lights[i].material[j]*material.specular_material[j]*pow(fmax(0.,Vec3::dot(R,V)),50);
-                    /*std::cout << "j : " << j << std::endl;
-                    std::cout << Is[j] << std::endl;
-                    std::cout << pow(fmax(0.,Vec3::dot(R,V)),material.shininess) << std::endl;
-                    std::cout << Is[j] << std::endl;*/
+                    //Is[j]+=lights[i].material[j]*material.specular_material[j]*pow(fmax(0.,Vec3::dot(R,V)),material.shininess);
                 }
                 
             }
-            /*
-            if (intersection[1] >=1-1e-2)
-            {
-                std::cout << "J'ai" << std::endl;
-            }
-            */
-            
             color=Ia+Id+Is;
-            //std::cout << Is[0] << "|" << Is[1] << "|" << Is[2] << std::endl;
         }
         return color;
     }
