@@ -149,29 +149,49 @@ public:
             Ia = Vec3(0.1,0.1,0.1);
             Id = Vec3(0.f,0.f,0.f);
             Is = Vec3(0.f,0.f,0.f);
-
             for (int i = 0; i < lights.size(); i++)
             {
-                Vec3 L = lights[i].pos-intersection;
-                L.normalize();
-                Vec3 N = normal;
-                N.normalize();
-                Vec3 R = 2 * Vec3::dot(N,L)*N-L;
-                R.normalize();
-                Vec3 V = ray.origin()-intersection;
-                V.normalize();
-                for (int j = 0; j < 3; j++)
-                {
-                    Id[j]+=lights[i].material[j]*material.diffuse_material[j]*fmax(0.,Vec3::dot(L,N));
-                    //Is[j]+=lights[i].material[j]*material.specular_material[j]*pow(fmax(0.,Vec3::dot(R,V)),material.shininess);
+                if (!isShadow(intersection, lights[i])){
+                    Vec3 L = lights[i].pos-intersection;
+                    L.normalize();
+                    Vec3 N = normal;
+                    N.normalize();
+                    Vec3 R = 2 * Vec3::dot(N,L)*N-L;
+                    R.normalize();
+                    Vec3 V = ray.origin()-intersection;
+                    V.normalize();
+                    for (int j = 0; j < 3; j++)
+                    {
+                        Id[j]+=lights[i].material[j]*material.diffuse_material[j]*fmax(0.,Vec3::dot(L,N));
+                        //Is[j]+=lights[i].material[j]*material.specular_material[j]*pow(fmax(0.,Vec3::dot(R,V)),material.shininess);
+                    }
                 }
-                
             }
             color=Ia+Id+Is;
         }
         return color;
     }
-
+    bool isShadow(Vec3 intersection, Light light){
+        Ray rayon = Ray(light.pos, intersection-light.pos);
+        RaySceneIntersection sceneIntersection = computeIntersection(rayon);
+        Vec3 shadowOriginIntersection;
+        if (sceneIntersection.intersectionExists)
+        {
+            switch (sceneIntersection.typeOfIntersectedObject)
+            {
+            case SPHERE:
+                shadowOriginIntersection = sceneIntersection.raySphereIntersection.intersection;
+                break;
+            case SQUARE:
+                shadowOriginIntersection = sceneIntersection.raySquareIntersection.intersection;
+                break;
+            default:
+                break;
+            }    
+            return (intersection-light.pos).length()>(shadowOriginIntersection-light.pos).length()&&(shadowOriginIntersection-intersection).length()>1e-5;
+        }
+        return false;
+    }
 
     Vec3 rayTraceRecursive( Ray ray , int NRemainingBounces ) {
         //TODO RaySceneIntersection raySceneIntersection = computeIntersection(ray);
