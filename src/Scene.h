@@ -285,7 +285,7 @@ public:
                         result_temp.intersectionExists=false;
                     }}
                     */
-                //result_temp.intersectionExists=!computeHardShadow(P, lights[iLight]);
+                result_temp.intersectionExists=!computeHardShadow(P, lights[iLight]);
                 if (result_temp.intersectionExists){
                     L = lights[iLight].pos - P;
                     L.normalize();
@@ -327,10 +327,11 @@ public:
             color = phong(raySceneIntersection);
         }
         //hard shadow
-
+        /*
         if (raySceneIntersection.intersectionExists&&raySceneIntersection.typeOfIntersectedObject==SQUARE){
             color = (1-computeSoftShadow(raySceneIntersection)) * color;
         }
+        */
         return color;
     }
 
