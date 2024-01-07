@@ -149,7 +149,11 @@ public:
             Ia = Vec3(0.1,0.1,0.1);
             Id = Vec3(0.f,0.f,0.f);
             Is = Vec3(0.f,0.f,0.f);
-            for (int i = 0; i < lights.size(); i++)
+            int numberLightOrigin = lights.size();
+            int multLight = 2;
+            int currentNumberLights=lights.size()*multLight;
+            generateLights(multLight);
+            for (int i = 1; i < lights.size(); i++)
             {
                 if (!isShadow(intersection, lights[i])){
                     Vec3 L = lights[i].pos-intersection;
@@ -167,7 +171,12 @@ public:
                     }
                 }
             }
-            color=Ia+Id+Is;
+            color=Ia+(Id+Is);// /multLight;
+            while (currentNumberLights>numberLightOrigin)
+            {
+                lights.pop_back();
+                currentNumberLights=lights.size();
+            }
         }
         return color;
     }
@@ -191,6 +200,22 @@ public:
             return (intersection-light.pos).length()>(shadowOriginIntersection-light.pos).length()&&(shadowOriginIntersection-intersection).length()>1e-5;
         }
         return false;
+    }
+
+    void generateLights(int multLight){
+        size_t originalLightsize = lights.size();
+        Light newLight;
+        for (int i = 0; i < multLight-1; i++)
+        {
+            for (int j = 0; j < originalLightsize; j++)
+            {
+                newLight= lights[j];
+                newLight.pos[0]+=(((float) rand() / RAND_MAX) *2)-1;
+                newLight.pos[1]+=(((float) rand() / RAND_MAX) *2)-1;
+                newLight.pos[2]+=(((float) rand() / RAND_MAX) *2)-1;
+                lights.push_back(newLight);
+            }
+        }
     }
 
     Vec3 rayTraceRecursive( Ray ray , int NRemainingBounces ) {
